@@ -1,0 +1,29 @@
+
+/* ---------- cv::VideoWriter () ------------ */
+fourcc('M','J','P','G')
+fourcc('H','2','6','4')	// arbeitet mit vlc bei color und bei grayscale
+
+/* ---------- VideoPlayer ------------------ */
+vlc  arbeitet mit H.264
+
+/* ---------- verwendete library finden ------------ */
+ldd lookat
+ldd lookat | grep opencv
+
+
+/* ---------- set enveriment variable LD_LIBRARY_PATH -----------/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pi/c_source/lookat/libs
+
+// --- show path ---
+echo $LD_LIBRARY_PATH
+
+/* ----------- make auf zero -----------*/
+make -f Makezero
+
+/* ---------- Kamera Viewer -----------*/
+guvcview  // Funktioniert nicht auf Raspi !!!
+
+/* ---------- Compiler aktualisieren ---------------- */
+sudo apt update
+sudo apt upgrade g++
+
