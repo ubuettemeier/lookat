@@ -5,7 +5,7 @@
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 8
-#define VERSION_PATCH 7
+#define VERSION_PATCH 8
 
 #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH))
 // #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR))
@@ -31,4 +31,5 @@ v0.8.5    #include <filesystem> ausgetauscht gegen <experimental/filesystem>
 v0.8.6    run.sh NEW
 v0.8.6    make_path() mit __cplusplus Abtrage versehen. Ist für <filesystem> erforderlich.
 v0.8.7    github repository created.
+c0.8.8    README.md erweitert.
 */
