@@ -6,7 +6,7 @@
  * @file main.cpp
  * @author Ulrich Buettemeier
  * @date 2021-11-01
- * @link https://github.com/ubuettemeier/lookat.git
+ * @link https://github.com/ubuettemeier/lookat.git @endlink
  * 
  * @copyright Copyright (c) 2021, 2022, 2023 Ulrich Buettemeier, Stemwede
  * 
@@ -36,7 +36,7 @@ Usage: ./lookat [options]\n
 Options:\n
   -h --help            Print this help screen\n
   -e --threshold <arg> Schwellwert; default: 64\n
-  -c --cam <arg>       Camera-Nr; default: 0\n
+  -c --cam <arg>       Kamera-Nr; default: 0. Verfügbare Kameras lassen sich mit ls /dev/video* anzeigen.
   -m --manuell         Start/Stop prozess with key 'm'\n
   -n --noutput         keine Bildschirmausgabe\n
   -d --diff <arg>      Pixel-Differenz zum Vorgängerbild [1..5000]; default: 5\n
@@ -177,7 +177,7 @@ struct _properties_ {
     int cam_index = 0;          //!< Kann mit Parameter --cam geändert werden.
     int threshold = 64;         //!< Alle Pixel in diff unter 64 werden auf 0 gesetzt. @see @ref schwelle()
     int diff_non_zero = 0;      //!< Enthält die aktuelle NonZero Differenz von last_in - first_in. 
-    int video_start_diff = 5;   //!< sobald @ref diff_non_zero >= video_start_diff ist, wird eine Aufnahme gestartet! Wertebereich: [1...5000]. @see @ref control()
+    int video_start_diff = 5;   //!< sobald @ref diff_non_zero >= video_start_diff ist, wird eine Aufnahme gestartet! Wertebereich: [1...5000]. See: @ref control(). Das Flag @ref falle_aktiv wird auf TRUE gesetzt!
     bool falle_aktiv = false;   //!< Flag zeigt an, ob eine Bewegung erkannt wurde. @ref get_frame().
     int trail = 7;              //!< Nachlauf in frames. ca.1200 ms
     bool run = true;
@@ -248,6 +248,7 @@ int init_folder ();
 cv::Mat make_ausgabe_screen (cv::Mat src, cv::Mat seg_screen);
 void make_seg (cv::Mat src);
 void write_diff_non_zero_to_diff ();
+int check_pixdiff ();
 void schwelle (cv::Mat &s, uint8_t schwellwert);    // Schwellwertfunktion für Differenz-bild
 void get_frame ();
 
@@ -284,7 +285,7 @@ static void help()
     cout << "Options:\n";
     cout << "  -h --help            Print this help screen\n";
     cout << "  -e --threshold <arg> Schwellwert; default: " << properties.threshold << endl;
-    cout << "  -c --cam <arg>       Camera-Nr; default: " << properties.cam_index << endl;
+    cout << "  -c --cam <arg>       Kamera-Nr; default: " << properties.cam_index << ". Verfügbare Kameras lassen sich mit ls /dev/video* anzeigen." << endl;
     cout << "  -m --manuell         Start/Stop prozess with key 'm'\n";
     cout << "  -n --noutput         keine Bildschirmausgabe\n";
     cout << "  -d --diff <arg>      Pixel-Differenz zum Vorgängerbild [1..5000]; default: " << properties.video_start_diff << endl;
@@ -484,6 +485,9 @@ int check_plausibiliti_of_opt ()
 
         return EXIT_FAILURE;
     }
+
+    // properties.NonZero_seg
+
     return EXIT_SUCCESS;
 }
 
@@ -1007,6 +1011,30 @@ void make_seg (cv::Mat src)
 #endif
 }
 
+/*! ----------------------------------------------------------------------------------
+ * @brief Überprüft den Wert von `properties.NonZero_seg` im Vergleich zur Mosaikfläche.
+ *
+ * Diese Funktion überprüft, ob der Wert von `properties.NonZero_seg` größer oder gleich
+ * der Anzahl der Pixel in der Mosaikfläche ist. Wenn dies der Fall ist, wird eine Warnung
+ * ausgegeben und der Wert von `properties.NonZero_seg` auf die Mosaikfläche minus 1
+ * zurückgesetzt. Anschließend gibt die Funktion den Wert von `properties.NonZero_seg` zurück.
+ *
+ * @return Der Wert von `properties.NonZero_seg` nach der Überprüfung.
+ */
+int check_pixdiff ()
+{
+    int anz_pix = seg_diff[0][0].cols * seg_diff[0][0].rows;
+
+    if (properties.NonZero_seg >= anz_pix) {
+        cout << "WARNING: --pixdiff ist > als Mosaik-Fläche\n";
+        cout << "Mosaik-Fläche: " << seg_diff[0][0].cols << " / " << seg_diff[0][0].rows << " = " << anz_pix << endl;
+        cout << "--pixdiff: " << properties.NonZero_seg << endl; 
+        cout << "--pixdiff wird zurückgesetzt auf Mosaik-Fläche-1\n";
+    }
+
+    return properties.NonZero_seg;
+}
+
 /*! -------------------------------------------------
  * @brief 
  */
@@ -1380,6 +1408,8 @@ int main (int argc, char ** argv)
         cout << "+" << flush;
     }
     cout << endl;
+
+    check_pixdiff ();
 
     int key = -1;
     int ende = 0;
