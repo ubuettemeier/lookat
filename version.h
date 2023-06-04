@@ -5,7 +5,7 @@
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 8
-#define VERSION_PATCH 9
+#define VERSION_PATCH 10
 
 #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH))
 // #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR))
@@ -33,4 +33,5 @@ v0.8.6    make_path() mit __cplusplus Abtrage versehen. Ist für <filesystem> er
 v0.8.7    github repository created.
 c0.8.8    README.md erweitert.
 v0.8.9    Verzeichnis für Autostart-Script angelegt. Doxygen Verbesserungen. struct _cam_para_ NEW.
+v0.8.10   Doxygen Doku erweitert.
 */

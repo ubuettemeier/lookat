@@ -108,7 +108,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D WITH_GTK=OFF
 
 
-// Timing: 2h
+// Timing: 2h  // Raspi
 // make -j$(nproc)	/* funktioniert nicht. Bleibt auf dem <zero 2 w> bei 17% hängen */
 make
 sudo make install

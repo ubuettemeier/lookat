@@ -6,6 +6,7 @@
  * @file main.cpp
  * @author Ulrich Buettemeier
  * @date 2021-11-01
+ * @link https://github.com/ubuettemeier/lookat.git
  * 
  * @copyright Copyright (c) 2021, 2022, 2023 Ulrich Buettemeier, Stemwede
  * 
@@ -13,7 +14,8 @@
  *          - System auf Raspi zero 2 w portieren.
  *          - Programm beenden mit SIGNAL. S.auch killall
  * 
- * @note <guvcview> funktioniert nicht mit der raspi-camera!
+ * @note <guvcview> funktioniert nicht mit der raspi-camera! \n 
+ *       Verfügbare Kameras auflisten: ls /dev/video*
  */
 
 /*! -----------------------------------------------------------------------------------------
@@ -225,7 +227,7 @@ static int peek_character = -1;                         //!< globale value für 
 static void help ();
 static void show_short_keys ();
 static void show_cplus_version ();
-void check_long_options (struct option *opt, char *optarg);
+static void check_long_options (struct option *opt, char *optarg);
 int check_plausibiliti_of_opt ();
 int control_opt (int argc, char ** argv);
 void show_properties ();
@@ -277,7 +279,7 @@ static void help()
 {
     cout << "\n";
     cout << "lookat " << VERSION << endl;
-    cout << "(C) 2021 Ulrich Buettemeier\n\n";
+    cout << "(C) 2021, 2022, 2023 Ulrich Buettemeier, Stemwede\n\n";
     cout << "Usage: ./lookat [options]\n";
     cout << "Options:\n";
     cout << "  -h --help            Print this help screen\n";
@@ -321,6 +323,13 @@ static void show_short_keys ()
     cout << endl;
 }
 
+/*! ------------------------------------------------------------
+ * @brief Zeigt die unterstützte C++-Version an.
+ *
+ * Diese Funktion überprüft den Wert des __cplusplus-Makros, das vom Compiler vorgegeben ist,
+ * um die verwendete C++-Version zu bestimmen. Anschließend wird eine entsprechende Nachricht
+ * ausgegeben, die die unterstützte C++-Version angibt.
+ */
 static void show_cplus_version ()
 {
     if (__cplusplus == 201703L) {
@@ -379,7 +388,7 @@ static void reset_geo ()
 /*! --------------------------------------------------------------
  * @brief es werden die Option --pixdiff und --maxframe ausgewertet
  */
-void check_long_options (struct option *opt, char *optarg)
+static void check_long_options (struct option *opt, char *optarg)
 {
     if (strcmp (opt->name, "pixdiff") == 0) {           // option --pixdiff
         if (opt->has_arg == required_argument) {
@@ -457,26 +466,37 @@ void check_long_options (struct option *opt, char *optarg)
     }
 }
 
-/*! --------------------------------------------------------------
- * \brief Überprüft die Plausibilität der Optionen.
+/*! --------------------------------------------------------
+ * @brief Überprüft die Plausibilität der Optionen.
  *
- * Diese Funktion überprüft, ob die maximale Zeit (max_time) kleiner als die minimale Zeit (min_time) ist.
- * Wenn dies der Fall ist, wird eine Warnung ausgegeben und die maximale Zeit auf die minimale Zeit gesetzt.
+ * Diese Funktion prüft, ob die Eigenschaften der Optionen plausibel sind. Konkret wird
+ * überprüft, ob die maximale Zeit kleiner als die minimale Zeit ist. Falls dies der Fall ist,
+ * wird eine Warnung ausgegeben und die maximale Zeit auf die minimale Zeit gesetzt. Die Funktion
+ * gibt dann den entsprechenden Exit-Code zurück.
  *
- * \return immer EXIT_SUCCESS
+ * @return EXIT_SUCCESS, wenn die Optionen plausibel sind, sonst EXIT_FAILURE.
  */
 int check_plausibiliti_of_opt ()
 {
     if (properties.max_time < properties.min_time) {
         cout << "WARNING: maxvideotime < minvideotime\n";
         properties.max_time = properties.min_time;
+
+        return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
 }
 
-/*! --------------------------------------------------------------
- * @brief Parameterliste auswerten.
- * @return immer 0
+/*! -----------------------------------------------------------------
+ * @brief Verarbeitet die Steuerungsoptionen.
+ *
+ * Diese Funktion verarbeitet die Steuerungsoptionen, die als Befehlszeilenargumente übergeben
+ * werden. Sie verwendet die `getopt_long()` Funktion, um die Optionen zu analysieren und die
+ * entsprechenden Aktionen auszuführen.
+ *
+ * @param argc Die Anzahl der Befehlszeilenargumente.
+ * @param argv Ein Array von Zeigern auf die Befehlszeilenargumente.
+ * @return Der Rückgabewert ist immer 0.
  */
 int control_opt (int argc, char ** argv)
 {
@@ -633,7 +653,7 @@ int control_opt (int argc, char ** argv)
 }
 
 /*!	--------------------------------------------------------------------
- *	@brief	Fuer die Nutzung der Funktion kbhit()\n
+ *	@brief	Für die Nutzung der Funktion kbhit()\n
  * 			ist der Aufruf init_keyboard() erforderlich.\n
  *          Deinstalliert wird das keyboard mit close_keyboard().
  */

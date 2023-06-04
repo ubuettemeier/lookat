@@ -23,7 +23,7 @@ OPENCV_LIBS := opencv
 endif
 
 # --- gnu++11 uses GNU extensions. ---
-CFLAGS = --std=c++1y	# --std=c++1y   # --std=c++14   # Es ist c++17 wegen #include <filesystem> erforderlich
+CFLAGS = --std=c++14	# --std=c++14   # Es ist c++17 wegen #include <filesystem> erforderlich   # --std=c++1y ist veraltet.
 CFLAGS += -Wall -Wextra -c -O0 -DNDEBUG   # no ABI Warnings // undocumented option // used for Raspy
 CFLAGS += $(shell pkg-config --cflags $(OPENCV_LIBS))
 
