@@ -150,7 +150,6 @@ touch my_lib.conf
 // ------ save <my_lib.conf> in Path:/etc/ld.so.conf.d
 sudo ldconfig
 
-
 /* ----------- make auf zero -----------*/
 make -f Makezero
 

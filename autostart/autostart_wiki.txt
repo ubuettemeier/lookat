@@ -39,6 +39,7 @@ sudo chmod 755 /etc/init.d/start_lookat.sh
 
 // ------- skript starten / testen -------------------------
 sudo /etc/init.d/start_lookat.sh start
+
 // ------- skript stopen -------------------
 sudo /etc/init.d/start_lookat.sh stop
 

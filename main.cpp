@@ -114,7 +114,7 @@ Options:\n
 
 #include "opencv2/opencv.hpp"
 
-#define USE_CVD_
+// #define USE_CVD      //!< used by OpenCVD @see https://github.com/ubuettemeier/OpenCVD
 
 #ifdef USE_CVD
     #include "../../OpenCVD/include/opencvd.hpp"
@@ -126,14 +126,14 @@ Options:\n
 using namespace std;
 using namespace cv;
 
-#define MAX_IN 3
-#define HORZ_TEILER 8
-#define VERT_TEILER 6
-#define MAX_DELAY 100000       //!< Verweilzeit in [us] für @ref get_frame().
+#define MAX_IN 3                //!< Anzahl matrices für input-Screen. @ref in[], @ref src[]
+#define HORZ_TEILER 8           //!< Horizontale Auflösung für Mosaikbilder. @ref seg[], @ref seg_diff[], @ref seg_NonZero[]
+#define VERT_TEILER 6           //!< Vertikale Auflösung für Mosaikbilder. @ref seg[], @ref seg_diff[], @ref seg_NonZero[]
+#define MAX_DELAY 100000        //!< Verweilzeit in [us] für @ref get_frame().
 
-cv::Mat in[MAX_IN];
-cv::Mat src[MAX_IN];
-cv::Mat src_image;
+cv::Mat src[MAX_IN];            //!< ROI Ringpuffer von @ref src_image
+cv::Mat in[MAX_IN];             //!< gray Image Ringpuffer von @ref src[]
+cv::Mat src_image;              //!< Input Image
 
 cv::Mat seg[MAX_IN][HORZ_TEILER][VERT_TEILER];              //!< Mosaik-Bild z.B.:  640 x 480 => 80 x 80
 cv::Mat seg_diff[HORZ_TEILER][VERT_TEILER];                 //!< Mosaik Differenzbild
@@ -166,13 +166,11 @@ save_video sv;                  //!< class {@ref Save_Vid.hpp} initialisieren
     std::vector<cv::KeyPoint> pyrKeypoints;
 #endif
 
-uint16_t state = 0;             //!< wird in @ref control() verwendet
-int vid_counter = 0;
-std::string folder;             //!< Ausgabeverzeichnis; default: ~/lookat_video/DATUM  kann mit der Option --vidpath eingestellt werden.
-std::string home_dir;           //!< Home Verzeichnis @see {@ref get_homedir()}
-
 #pragma pack(1)
 
+/*! ---------------------------------------------------------------
+ * @brief Diverse Parameter
+ */
 struct _properties_ {
     int cam_index = 0;          //!< Kann mit Parameter --cam geändert werden.
     int threshold = 64;         //!< Alle Pixel in diff unter 64 werden auf 0 gesetzt. @see @ref schwelle()
@@ -187,7 +185,7 @@ struct _properties_ {
     int min_time = 2700;        //!< Min.Videolänge in [ms]. Kleinster zulässiger Wert ist 2000 ms
     int max_time = 20000;       //!< Max.Videolänge in [ms].
     bool only_picture = false;  //!< Bei true werden nur Bilder gespeichert, kein Videos. Wird mit der Option --picture eingeschaltet.
-    std::string vidpath;
+    std::string vidpath;        //!< Pfad zum Sichern der Bewegungs-Videos; default: ~/lookat_video/DATUM
 } properties;
 
 /*! ----------------------------------------------------------------------
@@ -196,23 +194,32 @@ struct _properties_ {
 struct _geo_ {
     int left = 0;
     int top = 0;
-    int right = 639;        // if (fwidth > geo.width) geo.width = fwidth;
-    int bottom = 479;       // if (fheight > geo.height) geo.height = fheight;
+    int right = 639;        // if (cam_para.fwidth > geo.width) geo.width = cam_para.fwidth;
+    int bottom = 479;       // if (cam_para.fheight > geo.height) geo.height = cam_para.fheight;
 } geo, new_geo = {-1, -1, -1, -1};
 
+/*! ------------------ --------------------------------------------
+ * @brief Camera Parameter
+ */
+struct _cam_para_ {
+    double saturation;      //!< Sättigung
+    double brightness;      //!< Helligkeit
+    double contrast;        //!< Kontrast
+    double exposure;        //!< Belichtungswert
+    double fwidth;          //!< Kamera Bildbreite
+    double fheight;         //!< Kamera Bildhöhe
+} cam_para;
+
 #pragma pack()
+
+uint16_t state = 0;             //!< wird in @ref control() verwendet
+int vid_counter = 0;
+std::string folder;             //!< Ausgabeverzeichnis; default: ~/lookat_video/DATUM  kann mit der Option --vidpath eingestellt werden.
+std::string home_dir;           //!< Home Verzeichnis @see {@ref get_homedir()}
 
  // Variablen werden für kbhit() und getch() benötigt
 static struct termios initial_settings, new_settings;   //!< globale value für {@ref kbhit()} und {@ref getch()}
 static int peek_character = -1;                         //!< globale value für {@ref kbhit()} und {@ref getch()}
-
-// ------------------ Camera Parameter ----------------------------
-double saturation;      //!< Sättigung
-double brightness;      //!< Helligkeit
-double contrast;        //!< Kontrast
-double exposure;        //!< Belichtungswert
-double fwidth;          //!< Kamera Bildbreite
-double fheight;         //!< Kamera Bildhöhe
 
 // --------------------- Prototypen ----------------------------------
 static void help ();
@@ -347,25 +354,25 @@ static void reset_geo ()
 {
     geo.left = (new_geo.left >= 0) ? new_geo.left : 0;
     geo.top = (new_geo.top !=-1) ? new_geo.top : 0;
-    geo.right = (new_geo.right !=-1) ? new_geo.right : fwidth-1;
-    geo.bottom = (new_geo.bottom !=-1) ? new_geo.bottom : fheight-1;
+    geo.right = (new_geo.right !=-1) ? new_geo.right : cam_para.fwidth-1;
+    geo.bottom = (new_geo.bottom !=-1) ? new_geo.bottom : cam_para.fheight-1;
 
     // Plausibilitätsprüfung
-    if ((geo.left > fwidth-1) || (geo.left >= geo.right)) {
+    if ((geo.left > cam_para.fwidth-1) || (geo.left >= geo.right)) {
         cout << "ERROR Parameter --left out of range. --left wird auf 0 gesetzt\n";
         geo.left = 0;
     }
-    if ((geo.right > fwidth-1) || (geo.right <= geo.left)) {
+    if ((geo.right > cam_para.fwidth-1) || (geo.right <= geo.left)) {
         cout << "ERROR Parameter --right out of range. --right wird auf MAX gesetzt\n";
-        geo.right = fwidth - 1;
+        geo.right = cam_para.fwidth - 1;
     }
-    if ((geo.top > fheight-1) || (geo.top >= geo.bottom)) {
+    if ((geo.top > cam_para.fheight-1) || (geo.top >= geo.bottom)) {
         cout << "ERROR Parameter --top out of range. --top wird auf 0 gesetzt\n";
         geo.top = 0;
     }
-    if ((geo.bottom > fheight-1) || (geo.bottom <= geo.top)) {
+    if ((geo.bottom > cam_para.fheight-1) || (geo.bottom <= geo.top)) {
         cout << "ERROR Parameter --bottom out of range. --bottom wird auf MAX gesetzt\n";
-        geo.bottom = fheight-1;
+        geo.bottom = cam_para.fheight-1;
     }
 }
 
@@ -1275,12 +1282,12 @@ static void get_cam_para ()
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, camheight);
 
     // ------------------ Camera Parameter ----------------------------
-    saturation = cap.get (cv::CAP_PROP_SATURATION);      // 1
-    brightness = cap.get (cv::CAP_PROP_BRIGHTNESS);      // 0
-    contrast = cap.get (cv::CAP_PROP_CONTRAST);          // 1
-    exposure = cap.get (cv::CAP_PROP_EXPOSURE);          // 157
-    fwidth = cap.get (cv::CAP_PROP_FRAME_WIDTH);
-    fheight = cap.get (cv::CAP_PROP_FRAME_HEIGHT);
+    cam_para.saturation = cap.get (cv::CAP_PROP_SATURATION);      // 1
+    cam_para.brightness = cap.get (cv::CAP_PROP_BRIGHTNESS);      // 0
+    cam_para.contrast = cap.get (cv::CAP_PROP_CONTRAST);          // 1
+    cam_para.exposure = cap.get (cv::CAP_PROP_EXPOSURE);          // 157
+    cam_para.fwidth = cap.get (cv::CAP_PROP_FRAME_WIDTH);
+    cam_para.fheight = cap.get (cv::CAP_PROP_FRAME_HEIGHT);
 }
 
 /*! ------------------------------------------------------------
@@ -1290,12 +1297,12 @@ static void get_cam_para ()
 static void show_cam_para ()
 {
     cout << "--------- cam para ----------\n";
-    cout << "saturation: " << saturation << endl;
-    cout << "brightness: " << brightness << endl;
-    cout << "contrast: " << contrast << endl;
-    cout << "exposure: " << exposure << endl;
-    cout << "fwidth: " << fwidth << endl;
-    cout << "fheight: " << fheight << endl;
+    cout << "cam_para.saturation: " << cam_para.saturation << endl;
+    cout << "cam_para.brightness: " << cam_para.brightness << endl;
+    cout << "cam_para.contrast: " << cam_para.contrast << endl;
+    cout << "cam_para.exposure: " << cam_para.exposure << endl;
+    cout << "cam_para.fwidth: " << cam_para.fwidth << endl;
+    cout << "cam_para.fheight: " << cam_para.fheight << endl;
 }
 
 /*! ------------------------------------------------------------
