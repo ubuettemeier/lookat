@@ -48,7 +48,7 @@ Options:\n
 \n
   --pixdiff <arg>      Pixel-Differenz[0..5000] für Mosaik-Segment; default: 25\n
   --minvidtime <arg>   Min.Videolänge in [ms]; default: 2700 ms. kleinster Wert ist 2000 ms.\n
-  --miaxidtime <arg>   Max.Videolänge in [ms]; default: 20000 ms.\n
+  --maxvidtime <arg>   Max.Videolänge in [ms]; default: 20000 ms.\n
   --maxvideo <arg>     Max.Anzahl Video's; default -1, d.h keine Begrenzung\n
   --vidpath <arg>      Pfad zum Sichern der Bewegungs-Videos; default: ~/lookat_video/DATUM\n
 \n
@@ -297,7 +297,7 @@ static void help()
     cout << endl;
     cout << "  --pixdiff <arg>      Pixel-Differenz[0..5000] für Mosaik-Segment; default: " << properties.NonZero_seg << endl;
     cout << "  --minvidtime <arg>   Min.Videolänge in [ms]; default: 2700 ms. Kleinster Wert ist 2000 ms\n";
-    cout << "  --miaxidtime <arg>   Max.Videolänge in [ms]; default: 20000 ms\n";
+    cout << "  --maxvidtime <arg>   Max.Videolänge in [ms]; default: 20000 ms\n";
     cout << "  --maxvideo <arg>     Max.Anzahl Video's; default -1, d.h keine Begrenzung\n";
     cout << "  --vidpath <arg>      Pfad zum Sichern der Bewegungs-Videos; default: ~/lookat_video/DATUM\n";
     cout << endl;
@@ -516,9 +516,9 @@ int control_opt (int argc, char ** argv)
         { "gray", no_argument, 0, 'g' },
         { "trail", required_argument, 0, 'a' },         // Nachlauf in frames
         { "picture", no_argument, 0, 'p' },             // Bildmodus
-        { "pixdiff", required_argument, 0, 0 },            // Pixel-Differenz[0..5000] für Mosaik-Segment
-        { "maxframe", required_argument, 0, 0 },           // Max.Anzahl Bilder pro Video. Default 100
-        { "maxvideo", required_argument, 0, 0 },           // Max.Anzahl Video's, default -1, d.h keine Begrenzung
+        { "pixdiff", required_argument, 0, 0 },         // Pixel-Differenz[0..5000] für Mosaik-Segment
+        { "maxframe", required_argument, 0, 0 },        // Max.Anzahl Bilder pro Video. Default 100
+        { "maxvideo", required_argument, 0, 0 },        // Max.Anzahl Video's, default -1, d.h keine Begrenzung
         { "minvidtime", required_argument, 0, 0 },
         { "maxvidtime", required_argument, 0, 0 },
         { "vidpath", required_argument, 0, 0 },
@@ -1070,7 +1070,7 @@ void get_frame()
     properties.falle_aktiv = false;
     properties.frame_delay = MAX_DELAY;
 
-    cap >> src_image;                               // Bildeinzug
+    cap >> src_image;                                   // Bildeinzug
     src[first_in] = src_image(cv::Rect(geo.left, geo.top, geo.right-geo.left+1, geo.bottom-geo.top+1)); // ROI
     now[first_in] = time(NULL);                         // Aufnahme-Zeitpunkt festhalten.
 

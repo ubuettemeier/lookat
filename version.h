@@ -5,7 +5,7 @@
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 8
-#define VERSION_PATCH 11
+#define VERSION_PATCH 12
 
 #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH))
 // #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR))
@@ -35,4 +35,5 @@ c0.8.8    README.md erweitert.
 v0.8.9    Verzeichnis für Autostart-Script angelegt. Doxygen Verbesserungen. struct _cam_para_ NEW.
 v0.8.10   Doxygen Doku erweitert.
 v0.8.11   Funktion check_pixdiff () NEW.
+v0.8.12   README.md erweitert. 
 */

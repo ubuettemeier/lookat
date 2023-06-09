@@ -6,7 +6,9 @@ geo.dat
 go.sh
 log.dat
 lookat
-
+todo.txt
+wiki.txt
+zero broadcom pins.bmp
 
 # Prerequisites
 *.d
