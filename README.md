@@ -31,7 +31,7 @@ Options:
   --minvidtime (arg)   Min.Videolänge in [ms]; default: 2700 ms. kleinster Wert ist 2000 ms.
   --maxvidtime (arg)   Max.Videolänge in [ms]; default: 20000 ms.
   --maxvideo (arg)     Max.Anzahl Video's; default -1, d.h keine Begrenzung
-  --vidpath (arg)      Pfad zum Sichern der Bewegungs-Videos; default: ~/lookat_video/DATUM
+  --vidpath (arg)      Pfad zum Sichern der Videos; default: ~/lookat_video/DATUM
 
 ------ Sensitiver Bildausschnitt ------
   -l --left (arg)       left roi

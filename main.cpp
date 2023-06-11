@@ -34,35 +34,35 @@
  * \n
 Usage: ./lookat [options]\n
 Options:\n
-  -h --help            Print this help screen\n
-  -e --threshold <arg> Schwellwert; default: 64\n
-  -c --cam <arg>       Kamera-Nr; default: 0. Verfügbare Kameras lassen sich mit ls /dev/video* anzeigen.
-  -m --manuell         Start/Stop prozess with key 'm'\n
-  -n --noutput         keine Bildschirmausgabe\n
-  -d --diff <arg>      Pixel-Differenz zum Vorgängerbild [1..5000]; default: 5\n
-  -g --gray            Save grayscale\n
-  -a --trail <arg>     Nachlauf in frames; default: 7\n
-  -p --picture         save only picture\n
-  -w --camwidth <arg>  Kamerabild Breite; default: 640\n
-  -i --camheight <arg> Kamerabild Höhe; default: 480\n
+  -h --help            Print this help screen \n
+  -e --threshold <arg> Schwellwert; default: 64 \n
+  -c --cam <arg>       Kamera-Nr; default: 0. Verfügbare Kameras lassen sich mit ls /dev/video* anzeigen. \n
+  -m --manuell         Start/Stop prozess with key 'm' \n
+  -n --noutput         keine Bildschirmausgabe \n
+  -d --diff <arg>      Pixel-Differenz zum Vorgängerbild [1..5000]; default: 5 \n
+  -g --gray            Save grayscale \n
+  -a --trail <arg>     Nachlauf in frames; default: 7 \n
+  -p --picture         save only picture \n
+  -w --camwidth <arg>  Kamerabild Breite; default: 640 \n
+  -i --camheight <arg> Kamerabild Höhe; default: 480 \n
 \n
-  --pixdiff <arg>      Pixel-Differenz[0..5000] für Mosaik-Segment; default: 25\n
-  --minvidtime <arg>   Min.Videolänge in [ms]; default: 2700 ms. kleinster Wert ist 2000 ms.\n
-  --maxvidtime <arg>   Max.Videolänge in [ms]; default: 20000 ms.\n
-  --maxvideo <arg>     Max.Anzahl Video's; default -1, d.h keine Begrenzung\n
-  --vidpath <arg>      Pfad zum Sichern der Bewegungs-Videos; default: ~/lookat_video/DATUM\n
+  --pixdiff <arg>      Pixel-Differenz[0..5000] für Mosaik-Segment; default: 25 \n
+  --minvidtime <arg>   Min.Videolänge in [ms]; default: 2700 ms. kleinster Wert ist 2000 ms. \n
+  --maxvidtime <arg>   Max.Videolänge in [ms]; default: 20000 ms. \n
+  --maxvideo <arg>     Max.Anzahl Video's; default -1, d.h keine Begrenzung \n
+  --vidpath <arg>      Pfad zum Sichern der Videos; default: ~/lookat_video/DATUM \n
 \n
------- Sensitiver Bildausschnitt ------\n
-  -l --left <arg>       left roi\n
-  -r --right <arg>      right roi\n
-  -t --top <arg>        top roi\n
-  -b --bottom <arg>     bottom roi\n
+------ Sensitiver Bildausschnitt ------ \n
+  -l --left <arg>       left roi \n
+  -r --right <arg>      right roi \n
+  -t --top <arg>        top roi \n
+  -b --bottom <arg>     bottom roi \n
 \n
------- hot key's ------\n
-      ESC, q = Programende\n
-           h = this message\n
-           m = toogle prozess\n
-           i = show parameter\n
+------ hot key's ------ \n
+      ESC, q = Programende \n
+           h = this message \n
+           m = toogle prozess \n
+           i = show parameter \n
 \n
 @code
 ./lookat --camwidth 800 --camheight 600 -l 50 -r 750 -t 150 -b 400 --maxvideo 50
@@ -148,7 +148,7 @@ int contour_x_center = 0;                                   //!< Konturschwerpun
     cv::Mat show_seg;                           // Ausgabebild für Mosaik
 #endif
 
-cv::Mat diff, back;
+cv::Mat diff, back;                         //!< Differenzbild, Hintergrundbild
 uint8_t first_in = 0, last_in = MAX_IN-1;   //!< Ringzähler
 int anz_zero[MAX_IN] = {-1};                //!< Speicher für NonZero-Werte
 time_t now[MAX_IN];                         //!< Aufnahme-Zeitpunkt
@@ -180,7 +180,7 @@ struct _properties_ {
     int video_start_diff = 5;   //!< sobald @ref diff_non_zero >= video_start_diff ist, wird eine Aufnahme gestartet! Wertebereich: [1...5000]. See: @ref control(). Das Flag @ref falle_aktiv wird auf TRUE gesetzt!
     bool falle_aktiv = false;   //!< Flag zeigt an, ob eine Bewegung erkannt wurde. @ref get_frame().
     int trail = 7;              //!< Nachlauf in frames. ca.1200 ms
-    bool run = true;
+    bool run = true;            //!< Überwachung aktiv / inaktiv
     bool no_output = false;     //!< bei true wird kein Camerabild gezeigt. Wird mit der Option --noutput gesetzt.
     int frame_delay = MAX_DELAY;    //!< Verweilzeit in [us] für @ref get_frame().
     int NonZero_seg = 25;       //!< pixdiff für Mosaik. Lässt sich mit der Option --pixdiff ändern.
@@ -196,8 +196,8 @@ struct _properties_ {
 struct _geo_ {
     int left = 0;
     int top = 0;
-    int right = 639;        // if (cam_para.fwidth > geo.width) geo.width = cam_para.fwidth;
-    int bottom = 479;       // if (cam_para.fheight > geo.height) geo.height = cam_para.fheight;
+    int right = 639;        //!< if (cam_para.fwidth > geo.width) geo.width = cam_para.fwidth;
+    int bottom = 479;       //!< if (cam_para.fheight > geo.height) geo.height = cam_para.fheight;
 } geo, new_geo = {-1, -1, -1, -1};
 
 /*! ------------------ --------------------------------------------
@@ -299,7 +299,7 @@ static void help()
     cout << "  --minvidtime <arg>   Min.Videolänge in [ms]; default: 2700 ms. Kleinster Wert ist 2000 ms\n";
     cout << "  --maxvidtime <arg>   Max.Videolänge in [ms]; default: 20000 ms\n";
     cout << "  --maxvideo <arg>     Max.Anzahl Video's; default -1, d.h keine Begrenzung\n";
-    cout << "  --vidpath <arg>      Pfad zum Sichern der Bewegungs-Videos; default: ~/lookat_video/DATUM\n";
+    cout << "  --vidpath <arg>      Pfad zum Sichern der Videos; default: ~/lookat_video/DATUM\n";
     cout << endl;
     cout << "------ Sensitiver Bildausschnitt ------\n";
     cout << "  -l --left <arg>      left roi\n";
@@ -357,7 +357,7 @@ static void show_geo ()
 }
 
 /*! ----------------------------------------
- * @brief {@ref struct _geo_} wird mit Screen-Abmessung belegt.\n
+ * @brief struct _geo_ wird mit Screen-Abmessung belegt.\n
  *        Es ist wichtig, das im Vorfeld die Funktion {@ref get_cam_para()} aufgerufen wurde!
  */
 static void reset_geo ()
@@ -386,8 +386,11 @@ static void reset_geo ()
     }
 }
 
-/*! --------------------------------------------------------------
- * @brief es werden die Option --pixdiff und --maxframe ausgewertet
+/**
+ * @brief Überprüft lange Optionen und führt entsprechende Aktionen aus.
+ *
+ * @param opt Ein Zeiger auf eine Struktur vom Typ 'option', die die Option repräsentiert.
+ * @param optarg Ein Zeiger auf eine Zeichenkette, die das Argument der Option enthält.
  */
 static void check_long_options (struct option *opt, char *optarg)
 {
@@ -400,7 +403,7 @@ static void check_long_options (struct option *opt, char *optarg)
                 std::cout << "--pixdiff ERROR " << "#1: " << ex.what() << '\n';
                 return;
             }
-            if ((foo >= 0) && (foo <= 5000)) {
+            if ((foo >= 0) && (foo <= 5000)) {          // Plausibilität prüfen
                 properties.NonZero_seg = foo;
                 cout << "pixdeiff = " << properties.NonZero_seg << endl;
             } else 
@@ -455,7 +458,7 @@ static void check_long_options (struct option *opt, char *optarg)
         } else
             cout << "wrong parameter for optin --maxvid\n";
     // ---------------------
-    } else if (strcmp (opt->name, "vidpath") == 0) {           // option --maxvideo
+    } else if (strcmp (opt->name, "vidpath") == 0) {           // option --vidpath
         if (opt->has_arg == required_argument) {
             cout << "Path: " << optarg << endl;
             properties.vidpath = optarg;
@@ -657,8 +660,8 @@ int control_opt (int argc, char ** argv)
 }
 
 /*!	--------------------------------------------------------------------
- *	@brief	Für die Nutzung der Funktion kbhit()\n
- * 			ist der Aufruf init_keyboard() erforderlich.\n
+ *	@brief	Für die Nutzung der Funktion kbhit() \n
+ * 			ist der Aufruf init_keyboard() erforderlich. \n
  *          Deinstalliert wird das keyboard mit close_keyboard().
  */
 void init_keyboard()
@@ -674,8 +677,9 @@ void init_keyboard()
 }
 
 /*! --------------------------------------------------------------
- * @brief Funktion deinstaliert die Tastenabfrage.\n
- *        kbhit() ist anschliessend nicht mehr nutzbar.
+ * @brief Funktion deinstaliert die Tastenabfrage. \n
+ *        kbhit() ist anschliessend nicht mehr nutzbar. \n
+ *        Initialisiert wurde das Keyboard mit @ref init_keyboard().
  */
 void close_keyboard()
 {
@@ -1186,7 +1190,7 @@ static void control()
     get_frame();        // Bildeinzug und Bewegungserkennung. Wenn eine Bewegung erkannt wurde, wird <falle_aktiv> TRUE
     switch (state) {
         case 0: // --------------- idle - state ------------------
-            if (!properties.run) {      // ---- Überwachung ist inaktiv ----
+            if (!properties.run) {      // ---- Überwachung ist NICHT inaktiv ----
                 if (properties.falle_aktiv) {
                     static int n = 0;
                     if (!properties.no_output) cout << " Bewegung erkannt(" << n << "): " << properties.diff_non_zero << endl;     // Anzeigen, das die Falle eine Bewegung erkannt hat !!!
@@ -1426,8 +1430,8 @@ int main (int argc, char ** argv)
             if (!src_image.empty()) {
                 cv::rectangle (src_image, // src[first_in], 
                                cv::Point (geo.left, geo.top), cv::Point (geo.right, geo.bottom),
-                               cv::Scalar(0, 0, 255), 
-                               3);
+                               cv::Scalar(0, 255, 0),       // green
+                               2);
                 cv::imshow (src_win_name, src_image);
             }
 
