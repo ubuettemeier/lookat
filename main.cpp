@@ -61,8 +61,8 @@ Options:\n
 ----- Ignorierter Bildausschnitt ------ \n
   --ignorleft <arg>    left roi \n        
   --ignortop <arg>     right roi \n
-  --ignorwidth <arg>   width roi; default: 0 \n
-  --ignorheight <arg>  height roi; default 0 \n
+  --ignorwidth <arg>   width roi [0..50000]; default: 0 \n
+  --ignorheight <arg>  height roi [0..50000]; default 0 \n
 \n
 ------ hot key's ------ \n
       ESC, q = Programende \n
@@ -158,6 +158,7 @@ cv::Mat diff, back;                         //!< Differenzbild, Hintergrundbild
 uint8_t first_in = 0, last_in = MAX_IN-1;   //!< Ringzähler
 int anz_zero[MAX_IN] = {-1};                //!< Speicher für NonZero-Werte
 time_t now[MAX_IN];                         //!< Aufnahme-Zeitpunkt
+int anz_sensetive_pixel = 0;                //!< Anzahl der senetiven Pixel. Wird berechnet in @ref get_anzahl_sensetive_pixel()
 
 cv::VideoCapture cap;           //!< Kamera Konstructor. Gestartet wird die Kamera mit <cap.open()>
 save_video sv;                  //!< class {@ref Save_Vid.hpp} initialisieren
@@ -265,7 +266,7 @@ cv::Mat make_ausgabe_screen (cv::Mat src, cv::Mat seg_screen);
 void make_seg (cv::Mat src);
 void write_diff_non_zero_to_diff ();
 int check_pixdiff ();
-void schwelle (cv::Mat &s, uint8_t schwellwert);    // Schwellwertfunktion für Differenz-bild
+int get_anzahl_sensetive_pixel ();
 void get_frame ();
 
 static void control ();
@@ -1127,25 +1128,27 @@ int check_pixdiff ()
     return properties.NonZero_seg;
 }
 
-/*! -------------------------------------------------
- * @brief 
+/*! ----------------------------------------------------------
+ * @brief Gibt die Anzahl der sensitiven Pixel zurück.
+ *
+ * Diese Funktion berechnet die Anzahl der sensitiven Pixel in einem Bild. \n
+ * Die Berechnung ergibt sich aus (sensetive Fläche - ignor Fläche) \n
+ * Die sensetive Fläche ist @ref geo gespeichert. Die ignor Fläche ist in @ref ignor_geo gesichert.
+ * 
+ * @return Die Anzahl der sensitiven Pixel.
  */
-void schwelle (cv::Mat &s, uint8_t schwellwert)
+int get_anzahl_sensetive_pixel()
 {
-    #ifdef USE_CVD
-        int foo = get_numval<int>(schwellwert, "schwaelle", 0, 255);
-    #else 
-        int foo = schwellwert;
-    #endif
-
-    for (int y=0; y<s.rows; y++) {
-        uchar *p = s.ptr< uchar >(y);
-        for (int x=0; x<s.cols; x++) {
-            if (p[x] < foo) {
-                p[x] = 0;
-            }
-        }
+    cv::Mat foo (src_image.rows, src_image.cols, CV_8UC1, cv::Scalar(0));
+    cv::rectangle (foo, cv::Rect(geo.left, geo.top, geo.right-geo.left+1, geo.bottom-geo.top+1), 255, -1);
+    if (ignor_geo.ignorwidth != 0 && ignor_geo.ignorheight != 0) {
+        cv::rectangle (foo, 
+                       cv::Rect (ignor_geo.ignorleft, ignor_geo.ignortop, ignor_geo.ignorwidth, ignor_geo.ignorheight),
+                       cv::Scalar(0), 
+                       -1);
     }
+
+    return cv::countNonZero(foo);
 }
 
 /*! -------------------------------------------------
@@ -1514,7 +1517,10 @@ int main (int argc, char ** argv)
     }
     cout << endl;
 
-    check_pixdiff ();
+    check_pixdiff ();   // OPTION --pixdiff checken
+
+    anz_sensetive_pixel = get_anzahl_sensetive_pixel();
+    cout << "anz_sensetive_pixel = " << anz_sensetive_pixel << endl;
 
     int key = -1;
     int ende = 0;
