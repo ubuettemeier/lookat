@@ -1019,10 +1019,10 @@ void write_diff_non_zero_to_diff ()
 /*! -------------------------------------------------
  * @brief   Funktion erzeugt aus <src> ein Mosaik
  */
-void make_seg (cv::Mat src)
+void make_seg (cv::Mat basis)
 {
-    int w = src.cols / HORZ_TEILER;
-    int h = src.rows / VERT_TEILER;
+    int w = basis.cols / HORZ_TEILER;
+    int h = basis.rows / VERT_TEILER;
 
     /* code berechnet den Rest der Fensterteilung. Wird z.Z. noch nicht benötigt. 
     int wr = src.cols % HORZ_TEILER;
@@ -1032,7 +1032,7 @@ void make_seg (cv::Mat src)
     // ------------ Mosaik einrichten -------------------   
     for (int y=0; y<VERT_TEILER; y++) {
         for (int x=0; x<HORZ_TEILER; x++) {
-            seg[first_in][x][y] = src(cv::Rect(x*w, y*h, w, h));    // ROI einrichten
+            seg[first_in][x][y] = basis(cv::Rect(x*w, y*h, w, h));    // ROI einrichten
         }
     }
 
@@ -1308,7 +1308,8 @@ static void control()
                     if (!properties.no_output) cout << "now: " << properties.diff_non_zero << endl;
 
                     // int schwelle = 8000; 
-                    const int schwelle = (int)((float)(back.cols * back.rows) * 0.41666666666);     // 41,6% von back
+                    // const int schwelle = (int)((float)(back.cols * back.rows) * 0.41666666666);     // 41,6% von back
+                    const int schwelle = anz_sensetive_pixel * 0.41666666666;     // 41,6% von back
                     int delta = schwelle + 1;
 
                     if (!back.empty()) {    // es ist ein Hintergrundbild vorhanden !!!
