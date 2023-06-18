@@ -4,8 +4,8 @@
 #define STR(x) STR2(x)
 
 #define VERSION_MAJOR 0
-#define VERSION_MINOR 8
-#define VERSION_PATCH 13
+#define VERSION_MINOR 9
+#define VERSION_PATCH 0
 
 #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH))
 // #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR))
@@ -37,4 +37,5 @@ v0.8.10   Doxygen Doku erweitert.
 v0.8.11   Funktion check_pixdiff () NEW.
 v0.8.12   README.md erweitert. 
 v0.8.13   Doxygen Doku erweitert.
+v0.9.0    ignor Area NEW
 */

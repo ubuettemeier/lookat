@@ -58,6 +58,12 @@ Options:\n
   -t --top <arg>        top roi \n
   -b --bottom <arg>     bottom roi \n
 \n
+----- Ignorierter Bildausschnitt ------ \n
+  --ignorleft <arg>    left roi \n        
+  --ignortop <arg>     right roi \n
+  --ignorwidth <arg>   width roi; default: 0 \n
+  --ignorheight <arg>  height roi; default 0 \n
+\n
 ------ hot key's ------ \n
       ESC, q = Programende \n
            h = this message \n
@@ -200,6 +206,16 @@ struct _geo_ {
     int bottom = 479;       //!< if (cam_para.fheight > geo.height) geo.height = cam_para.fheight;
 } geo, new_geo = {-1, -1, -1, -1};
 
+/*! ----------------------------------------------------------------------
+ * @brief Ignorierter Bildausschnitt
+ */
+struct _ignor_geo_ {
+    int ignorleft = 0;
+    int ignortop = 0;
+    int ignorwidth = 0;
+    int ignorheight = 0;
+} ignor_geo;
+
 /*! ------------------ --------------------------------------------
  * @brief Camera Parameter
  */
@@ -307,6 +323,12 @@ static void help()
     cout << "  -t --top <arg>       top roi\n";
     cout << "  -b --bottom <arg>    bottom roi\n";
     cout << endl;
+    cout << "----- Ignorierter Bildausschnitt ------\n";
+    cout << "  --ignorleft <arg>    left roi\n";
+    cout << "  --ignortop <arg>     right roi\n";
+    cout << "  --ignorwidth <arg>   width roi; default: 0\n";
+    cout << "  --ignorheight <arg>  height roi; default 0\n";
+    cout << endl;
     show_short_keys ();
 }
 
@@ -354,6 +376,11 @@ static void show_geo ()
     cout << "   top = " << geo.top << endl;
     cout << " right = " << geo.right << endl;
     cout << "bottom = " << geo.bottom << endl;
+    cout << endl;
+    cout << "  ignorleft = " << ignor_geo.ignorleft << endl;
+    cout << "   ignortop = " << ignor_geo.ignortop << endl;
+    cout << " ignorwidth = " << ignor_geo.ignorwidth << endl;
+    cout << "ignorheight = " << ignor_geo.ignorheight << endl;
 }
 
 /*! ----------------------------------------
@@ -464,6 +491,62 @@ static void check_long_options (struct option *opt, char *optarg)
             properties.vidpath = optarg;
         } else
             cout << "wrong parameter for optin --vidpath\n";
+    // ---------------------- ignorleft --------------------------------
+    } else if (strcmp (opt->name, "ignorleft") == 0) {           // option --ignorleft
+        if (opt->has_arg == required_argument) {
+            int foo;
+            try {
+                foo = std::stoi (optarg);
+            } catch (std::invalid_argument const& ex) {
+                std::cout << "--ignorleft ERROR " << "#1: " << ex.what() << '\n';
+                return;
+            }
+            ignor_geo.ignorleft = foo;
+            cout << "ignorleft = " << ignor_geo.ignorleft << endl;
+        } else
+            cout << "wrong parameter for optin --ignorleft\n";
+    // ---------------------- ignortop --------------------------------
+    } else if (strcmp (opt->name, "ignortop") == 0) {           // option --ignortop
+        if (opt->has_arg == required_argument) {
+            int foo;
+            try {
+                foo = std::stoi (optarg);
+            } catch (std::invalid_argument const& ex) {
+                std::cout << "--ignortop ERROR " << "#1: " << ex.what() << '\n';
+                return;
+            }
+            ignor_geo.ignortop = foo;
+            cout << "ignortop = " << ignor_geo.ignortop << endl;
+        } else
+            cout << "wrong parameter for optin --ignortop\n";
+    // ---------------------- ignorwidth --------------------------------
+    } else if (strcmp (opt->name, "ignorwidth") == 0) {           // option --ignorwidth
+        if (opt->has_arg == required_argument) {
+            int foo;
+            try {
+                foo = std::stoi (optarg);
+            } catch (std::invalid_argument const& ex) {
+                std::cout << "--ignorwidth ERROR " << "#1: " << ex.what() << '\n';
+                return;
+            }
+            ignor_geo.ignorwidth = foo;
+            cout << "ignorwidth = " << ignor_geo.ignorwidth << endl;
+        } else
+            cout << "wrong parameter for optin --ignorwidth\n";
+    // ---------------------- ignorheight --------------------------------
+    } else if (strcmp (opt->name, "ignorheight") == 0) {           // option --ignorheight
+        if (opt->has_arg == required_argument) {
+            int foo;
+            try {
+                foo = std::stoi (optarg);
+            } catch (std::invalid_argument const& ex) {
+                std::cout << "--ignorheight ERROR " << "#1: " << ex.what() << '\n';
+                return;
+            }
+            ignor_geo.ignorheight = foo;
+            cout << "ignorheight = " << ignor_geo.ignorheight << endl;
+        } else
+            cout << "wrong parameter for optin --ignorheight\n";
     // ---------------------            
     } else {
         cout << opt->name << ": unbekannte Option\n";
@@ -533,6 +616,11 @@ int control_opt (int argc, char ** argv)
         { "top", required_argument, 0, 't' },
         { "right", required_argument, 0, 'r' },
         { "bottom", required_argument, 0, 'b' },
+
+        { "ignorleft", required_argument, 0, 0 },
+        { "ignortop", required_argument, 0, 0 },
+        { "ignorwidth", required_argument, 0, 0 },
+        { "ignorheight", required_argument, 0, 0 },
     };
 
     while (1) {
@@ -810,10 +898,10 @@ int make_path (std::string pname)
     try {
         if (fs::create_directories(dummy)) {
             // Verzeichnis erfolgreich erstellt
-            cout << "--vidpath eingerichtet !\n";   
+            cout << "--vidpath wird installiert !\n";   
         } else {
             // Das Verzeichnis existiert bereits oder es gab einen Fehler
-            cout << "--vidpath ist schon vorhanden !\n";
+            cout << "--vidpath eingerichtet !\n";
         }
         cout << "Path: " << dummy << endl;
     } catch (const std::filesystem::filesystem_error& ex) {
@@ -829,10 +917,10 @@ int make_path (std::string pname)
     try {
         if (fs::create_directories(dummy)) {
             // Verzeichnis erfolgreich erstellt
-            cout << "--vidpath eingerichtet !\n";   
+            cout << "--vidpath wird installiert !\n";   
         } else {
             // Das Verzeichnis existiert bereits oder es gab einen Fehler
-            cout << "--vidpath ist schon vorhanden !\n";
+            cout << "--vidpath eingerichtet !\n";
         }
         cout << "Path: " << dummy << endl;
     } catch (const experimental::filesystem::filesystem_error& ex) {
@@ -1016,7 +1104,7 @@ void make_seg (cv::Mat src)
 }
 
 /*! ----------------------------------------------------------------------------------
- * @brief Überprüft den Wert von `properties.NonZero_seg` im Vergleich zur Mosaikfläche.
+ * @brief Funktion vergleicht die Option `properties.NonZero_seg` mit der Mosaikfläche (seg_diff.cols * seg_diff.rows).
  *
  * Diese Funktion überprüft, ob der Wert von `properties.NonZero_seg` größer oder gleich
  * der Anzahl der Pixel in der Mosaikfläche ist. Wenn dies der Fall ist, wird eine Warnung
@@ -1075,7 +1163,20 @@ void get_frame()
     properties.frame_delay = MAX_DELAY;
 
     cap >> src_image;                                   // Bildeinzug
-    src[first_in] = src_image(cv::Rect(geo.left, geo.top, geo.right-geo.left+1, geo.bottom-geo.top+1)); // ROI
+    cv::Mat dummy;
+    src_image.copyTo (dummy);
+    if (ignor_geo.ignorwidth != 0 && ignor_geo.ignorheight != 0) {
+        cv::rectangle (dummy, 
+                       cv::Rect2d (ignor_geo.ignorleft, ignor_geo.ignortop, ignor_geo.ignorwidth, ignor_geo.ignorheight), 
+                       cv::Scalar (0, 0, 0),
+                       -1);
+        cv::rectangle (src_image, 
+                       cv::Rect2d (ignor_geo.ignorleft, ignor_geo.ignortop, ignor_geo.ignorwidth, ignor_geo.ignorheight), 
+                       cv::Scalar (0, 0, 255),
+                       2);
+    }
+
+    src[first_in] = dummy(cv::Rect(geo.left, geo.top, geo.right-geo.left+1, geo.bottom-geo.top+1)); // ROI
     now[first_in] = time(NULL);                         // Aufnahme-Zeitpunkt festhalten.
 
     cv::Mat gray;
