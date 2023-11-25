@@ -5,7 +5,7 @@
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 9
-#define VERSION_PATCH 2
+#define VERSION_PATCH 3
 
 #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH))
 // #define VERSION ("v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR))
@@ -40,4 +40,5 @@ v0.8.13   Doxygen Doku erweitert.
 v0.9.0    ignor Area NEW
 v0.9.1    Funktion <int get_anzahl_sensetive_pixel()> NEW
 v0.9.2    Variable <anz_sensetive_pixel> ausgewertet.
+v0.9.3    histogram.h: Funktion stretch_BGR() NEW
 */

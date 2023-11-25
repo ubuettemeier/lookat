@@ -204,6 +204,60 @@ class Histogram1D {
         return result;
     }
 
+    /*! ------------------------------------------------------------------
+     * @brief Es werden die 3 Channel von src gestretcht.
+     * 
+     * @param src Ein 3-Color Bild
+     * @param minValue of count in bins
+     * @param forward_methode the color conversion codes: für Hin-Transformation
+     * @param backward_methode the color conversion codes: für Rück-Transformation
+     * @example stretch_BGR (src, 500, cv::COLOR_BGR2HSV, cv::COLOR_HSV2BGR);
+     */
+    void stretch_BGR (cv::Mat &src, int minValue = 0, int forward_methode = -1, int backward_methode = -1) 
+    {
+        cv::Mat channel[3];
+        // cv::Mat foo;
+
+        if (forward_methode >= 0)
+            cv::cvtColor (src, src, forward_methode);
+
+        cv::split (src, channel);
+        for (int i=0; i<3; i++)
+            channel[i] = stretch (channel[i], minValue);
+
+        cv::merge (channel, 3, src);
+
+        if (backward_methode >= 0)
+            cv::cvtColor (src, src, backward_methode);
+    }
+
+    /*! --------------------------------------------------------
+     * @brief Es werden die 3 Channel von src gestretcht.
+     * 
+     * @param src Ein 3-Color Bild
+     * @param percentile 
+     * @param forward_methode the color conversion codes: für Hin-Transformation
+     * @param backward_methode the color conversion codes: für Rück-Transformation
+     * @example stretch_BGR (src, 0.05f, 1);
+     */
+    void stretch_BGR (cv::Mat &src, float percentile, int forward_methode = -1, int backward_methode = -1) 
+    {
+        cv::Mat channel[3];
+        // cv::Mat foo;
+
+        if (forward_methode >= 0)
+            cv::cvtColor (src, src, forward_methode);
+
+        cv::split (src, channel);
+        for (int i=0; i<3; i++)
+            channel[i] = stretch (channel[i], percentile);
+
+        cv::merge (channel, 3, src);
+
+        if (backward_methode >= 0)
+            cv::cvtColor (src, src, backward_methode);
+    }
+
     // static methods
 
     // Create an image representing a histogram

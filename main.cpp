@@ -591,8 +591,7 @@ int check_plausibiliti_of_opt ()
  */
 int control_opt (int argc, char ** argv)
 {
-    // long para, has_arg, flag, val(short para)
-    static const struct option long_options[] =
+    static const struct option long_options[] =     // const char *name; int has_arg; int *flag; int val;
     {
         { "help", no_argument, 0, 'h' },
         { "threshold", required_argument, 0, 'e' },     // Empfinlichkeit
